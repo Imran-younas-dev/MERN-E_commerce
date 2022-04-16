@@ -1,10 +1,10 @@
 import logo from './logo.svg';
 import './App.css';
-
+import Partial from './Components/EcommerceShop/Partial';
 function App() {
   return (
     <div className="App">
-    <h1>App component</h1>
+      <Partial />
     </div>
   );
 }
