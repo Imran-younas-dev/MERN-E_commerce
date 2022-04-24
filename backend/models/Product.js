@@ -45,15 +45,15 @@ const productSchema = new mongoose.Schema({
         {
             name : {
                 type : String,
-                // required : true
+                required : true
             },
             rating : {
                 type : Number,
-                // required : true
+                required : true
             },            
             Comment : {
                 type : Number,
-                // required : true
+                required : true
             }
         }
     ],

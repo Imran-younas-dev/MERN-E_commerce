@@ -2,7 +2,7 @@ const product = require("../models/Product");
 const ErrorHander = require('../Util/ErrorHander');
 // this is for any required in db then error generate
 const CatchAsynErros = require('../Middleware/CatchAsynErros');
-const Features = require('../Util/Features');
+const ApiFeatures = require('../Util/ApiFeatures');
 
 // create Product --Admin Site
 // CatchAsynErros this is for try catch 
@@ -66,13 +66,26 @@ if(!Product){
 
 
 // get All products
-exports.getAllproduct = CatchAsynErros(async (req, res) => {
-// using Keyword.
-  const apiFeature = new Features(product.find(), req.query).search();
-  const result = await apiFeature.query;
-  
+// exports.getAllproduct = CatchAsynErros(async (req, res) => {
+// // using Keyword.
+// const apiFeature = new ApiFeatures(product.find(), req.query.keyword).search();
+// var products = await apiFeature.query;  
+//   res.status(200).json({
+//     success: true,
+//     products,
+//   });
+// });
+
+exports.getAllproduct = CatchAsynErros(async (req, res, next) => {
+  const resultPerPage = 5;
+  const apiFeature = new ApiFeatures(product.find(), req.query)
+    .search()
+    .pagination(resultPerPage);
+    let products = await apiFeature.query;
   res.status(200).json({
     success: true,
-    result,
+    products,
   });
 });
+
+
