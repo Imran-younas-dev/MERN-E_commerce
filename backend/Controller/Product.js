@@ -66,18 +66,10 @@ if(!Product){
 
 
 // get All products
-// exports.getAllproduct = CatchAsynErros(async (req, res) => {
-// // using Keyword.
-// const apiFeature = new ApiFeatures(product.find(), req.query.keyword).search();
-// var products = await apiFeature.query;  
-//   res.status(200).json({
-//     success: true,
-//     products,
-//   });
-// });
-
 exports.getAllproduct = CatchAsynErros(async (req, res, next) => {
   const resultPerPage = 5;
+  // count for show in dashboard
+  const productCount = await product.countDocuments(); 
   const apiFeature = new ApiFeatures(product.find(), req.query)
     .search()
     .pagination(resultPerPage);
@@ -85,6 +77,7 @@ exports.getAllproduct = CatchAsynErros(async (req, res, next) => {
   res.status(200).json({
     success: true,
     products,
+    productCount,
   });
 });
 
