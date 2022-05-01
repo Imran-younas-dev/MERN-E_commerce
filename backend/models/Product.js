@@ -57,6 +57,12 @@ const productSchema = new mongoose.Schema({
             }
         }
     ],
+    // two user 1. admin 2. created product website
+    user : {
+        type  : mongoose.Schema.ObjectId,
+        ref : "User",
+        required : true,
+    },
     createdAt : {
         type : Date,
         default : Date.now

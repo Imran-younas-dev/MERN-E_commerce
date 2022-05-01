@@ -3,7 +3,8 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
 const dotenv = require("dotenv");
-
+// reset pwd
+const crypto  = require('crypto')
 
 dotenv.config({path : "./config/config.env"});
 const userSchema = new mongoose.Schema({
@@ -49,28 +50,36 @@ const userSchema = new mongoose.Schema({
 
 // bcryptjs when we encrypt js pre when user schema save
 userSchema.pre("save" , async function(next){
-// function bcoz we can't use <this>
+// function bcoz we can't use <this> in arrow
 // if => pwd change / update
-if(!this.isModified('password')){
-    next();
-}
+// Only run this function if password was moddified (not on other update functions)
+if (!this.isModified('password')) return next();
 // then this condition
 // 10 => stong pwd range 10
-this.password = await bcrypt.hash(this.password,10);
+ // Hash password with strength of 10
+ this.password = await bcrypt.hash(this.password, 10);
 }) 
-
-// JWT Token Genrate
-userSchema.methods.getJWTToken = function(){
-  return jwt.sign({id:this._id}, process.env.JWT_SECRET ,{
-            // process.env.JWT_EXPIRE = 5
-            expiresIn: process.env.JWT_EXPIRE,
-  });
-};
-// compare Password
-userSchema.methods.comparePassword = async function(Enterpassword){
-    return await bcrypt.compare(Enterpassword, this.password);
-
+//Return JSON web token
+userSchema.methods.getJwtToken = function(){
+    return jwt.sign({id:this._id}, process.env.JWT_SECRET, {
+        expiresIn:process.env.JWT_EXPIRES_TIME
+    });
 }
+// compare Password
+userSchema.methods.comparePassword = async function(enteredpassword){
+    return await bcrypt.compare(enteredpassword, this.password);
+}
+// Reset password through token
+// userSchema.methods.getResetPasswordToken() = async function(){
+    // Generate new Token 
+    // const newRestToken = crypto.randomBytes(20).toString("hex");
+    //  hash and adding resetPass to schema
+    // this.getResetPasswordToken = crypto.createHash("sha256").update(newRestToken).digest('hex');
+// pwd expire when generaten token = 10mnt
+    // this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+
+    // return newRestToken;
+// }
 
 
 

@@ -16,16 +16,16 @@ exports.isAuthUser = CatchAsynErros(async (req,res,next) =>{
     
       next();
     });
+    // you get array method bcoz ...roles => arr
     exports.authUserRole = (...roles) =>{
         return (req,res,next)=>{
-            // you get array method bcoz ...roles => arr
-            // if user not in role => not include in role
-            // as we store/login user data using req.user in above so we store the user all info
+            // if !roles=>not admin => not include in role
             if(!roles.includes(req.user.role)){
-             return next(new ErrorHander(`Role : ${req.user.role} is not allowed to acces this resource`,403) //server understand but refuse => 403
+            // as we store/login user data using req.user in above so we store the user all info
+                return next(new ErrorHander(`Role : ${req.user.role} is not allowed to acces this resource`,403) //server understand but refuse => 403
              )
             };
-        // if include user in role DB then next()=> skip
-        next();
+        //if role => admin then show product Update/delte/create accessibilty 
+            next();
         }
     }

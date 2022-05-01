@@ -1,8 +1,8 @@
 const User = require('../models/User');
 const ErrorHander = require('../Util/ErrorHander');
 const CatchAsynErros = require('../Middleware/CatchAsynErros');
-const sendToken = require('../Util/JwtToken');
-
+const { sendToken } = require('../Util/JwtToken');
+const sendEmail = require('../Util/sendEmail');
 
 // Register User
 exports.registerUser = CatchAsynErros(async (req, res, next) => {
@@ -18,14 +18,13 @@ exports.registerUser = CatchAsynErros(async (req, res, next) => {
         }
     });
 
-    // const token = user.getJWTToken();
+    // const token = user.getJwtToken();
     // res.status(201).json({
     //     success : true,
     //     // user,
     //     token,
     // })
-    sendToken(user, 201, res);
-    
+    // sendToken(user, 201, res);
   });
 exports.loginUser = CatchAsynErros(async (req,res,next) =>{
     const { email, password } = req.body;
@@ -36,7 +35,7 @@ exports.loginUser = CatchAsynErros(async (req,res,next) =>{
   }
 // ===========================================================
 //   if user in DB  , findOne=> One User in Db check   
-  const user = await User.findOne({ email }).select("+password");
+  const user = await User.findOne({ email : email }).select("+password");
 
   if (!user) {
     return next(new ErrorHander("Invalid email or password", 401));
@@ -49,8 +48,8 @@ exports.loginUser = CatchAsynErros(async (req,res,next) =>{
     return next(new ErrorHander("Invalid email or password", 401));
   }
     // if match password
-    // const token = user.getJWTToken();
-    // res.status(201).json({
+    // const token = user.getJwtToken();
+    // res.status(200).json({
     //     success : true,
     //     // user,
     //     token,
@@ -58,4 +57,118 @@ exports.loginUser = CatchAsynErros(async (req,res,next) =>{
   sendToken(user, 200, res);
 });
 
+
+// uSER lOGOUT 
+exports.UserLogOut = CatchAsynErros(async(req,res,next)=>{
+ res.cookie("token",null,{
+  expires : new Date(
+    Date.now()
+    ),
+    httpOnly : true,
+ })
+  res.status(200).json({
+    success : true,
+    message : "Loged Out Successfully.."
+  })  
+});
+
+
+// forgot Password
+exports.forgotPwd  = CatchAsynErros(async (req,res,next)=>{
+// first we find User 
+const user = await User.findOne({email : req.body.email});
+if(!user){
+  return next (new ErrorHander("User Not Found ", 404));
+}
+// get Reset pwd Token as we made in Usermodel
+const reseToken = user.getResetPasswordToken();
+
+// now Save new Token generated bcoz user save then can reset pwd
+await user.save({validateBeforeSave : false});
+// we get pwd and saved pwd as well new will send mail and create link
+// const resPwdUrl = `http://localhost/api/vi/password/reset/${reseToken}`;
+const resPwdUrl = `${req.protocol}://${req.get("host")}/api/vi/password/reset/${reseToken}`;
+// now We will create msg for sending customers
+const message = `Your Password reset :- \n\n ${resPwdUrl}`
+
+try {
+  await sendEmail({
+    // send email to requested User
+    email : user.email,
+    subject : `IK-SHOP password recovery`
+  });
+  // email send then
+  res.status(200).json({
+    success : true,
+    message : `E-mail send to ${user.email} successfully`,
+
+  })
   
+} catch (error) {
+  // if err then we undefined both
+  user.getResetPasswordToken = undefined,
+  user.resetPasswordExpire = undefined
+  // now will save the user again 
+await user.save({validateBeforeSave : false});
+return next(new ErrorHander(error.message));
+}
+});
+
+// User Routes e.g check profile, profile or pwd update
+// get User detailed
+exports.getUserDetails = CatchAsynErros(async (req,res,next)=>{
+  // get user by Id => req.user.id
+  const user = await User.findById(req.user.id);
+  if(!user){
+    // then nothing bcoz it could be not that we get user req.user.id => user be already 
+  }
+  res.status(200).json({
+    success : true,
+    user,
+  });
+});
+
+// User Update Password Route
+exports.updatePassword = CatchAsynErros(async (req,res,next)=>{
+// get user by Id => req.user.id
+const user = await User.findById(req.user.id).select("+password");
+if(!user){
+  // then nothing bcoz it could be not that we get user req.user.id => user be already 
+}
+const isPasswordMatched = await user.comparePassword(req.body.Oldpassword);
+// if old pwd not match .. 
+if (!isPasswordMatched) {
+return next(new ErrorHander("Old password is Incorrect", 401));
+}
+// mean both must be same old = new
+if(req.body.newPassword !== req.body.confirmPassword){
+return next(new ErrorHander("Passsword doeen't matched", 401));
+}
+// above all condition true old,new,confirm then 
+// save newpwd in user.pwd , newpwd = confirmPwd
+user.password = req.body.newPassword;
+// save new pwd change success
+await user.save();
+
+sendToken(user, 200, res);
+});
+
+// Update User profile .....
+exports.updateUserProfile = CatchAsynErros(async (req,res,next)=>{
+
+const upadateProfile = {
+  name : req.body.name,
+  email : req.body.email
+  // image we will do letter
+}
+const user = await User.findByIdAndUpdate(req.user.id , upadateProfile, {
+new : true,
+runValidators : true,
+useFindAndModify: false
+});
+
+  res.status(200).json({
+    success : true,
+    upadateProfile,
+  });
+});

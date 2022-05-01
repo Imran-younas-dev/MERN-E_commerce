@@ -7,6 +7,9 @@ const ApiFeatures = require('../Util/ApiFeatures');
 // create Product --Admin Site
 // CatchAsynErros this is for try catch 
 exports.createProduct = CatchAsynErros(async (req, res, next) => {
+//  Acces name  e.g req.body.name 
+// req.user.id => user logedin we save user Id 
+  req.body.user = req.user.id; //direct val assign => id
   // using create method
   const Product = await product.create(req.body);
   res.status(200).json({
@@ -19,7 +22,7 @@ exports.createProduct = CatchAsynErros(async (req, res, next) => {
 exports.updateProduct = CatchAsynErros(async (req, res, next) => {
   // let is liye q k isi ko change krne valy hai
   let Product = await product.findById(req.params.id);
-  // agr product ni mili
+  // if product didn't get
   if (!Product) {
   return next(new ErrorHander("Product Not Fount", 404))
     

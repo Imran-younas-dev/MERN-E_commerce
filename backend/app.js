@@ -1,44 +1,94 @@
-// import pakages
-const express = require('express');
-const ErrorMiddleware = require('./Middleware/ErrorMiddleware')
-const dotenv = require("dotenv");
-// Route Import
-const product = require('./Routes/app');
-const user = require('./Routes/User');
-// import Database
-const connectDatabase = require('./config/database');
-
+const express = require("express");
 const app = express();
-// const PORT = 5000;
-// env config path
-dotenv.config({path : "./config/config.env"});
+const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser");
+const path = require("path");
 
-// Handling Uncought Exception
-process.on("uncaughtException", (err) =>{
-console.log(`Error : ${err.message}`);
-console.log("Shutting Down the server due to Handling Uncought Exception");
-process.exit(1);
-})
+const ErrorMiddleware = require('./Middleware/ErrorMiddleware')
 
 
+// Config
+if (process.env.NODE_ENV !== "PRODUCTION") {
+  require("dotenv").config({ path: "backend/config/config.env" });
+}
 
-// Call middleware
 app.use(express.json());
-app.use("/api/v1" , product);
-app.use("/api/v1" , user);
-// Middleware Error
-app.use(ErrorMiddleware);
-// connent database
-connectDatabase(); // 
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-const server  = app.listen(process.env.PORT , ()=>{
-    console.log(`Server is running in PORT # ${process.env.PORT})`);
-})
-// unhandled Promise Rejection check Error
-process.on("unhandledRejection", err => {
-console.log(`Error  : ${err.message}`);
-console.log("Shutting Down the server due to unhandled Promise rejection");
-server.close(() =>{
-    process.exit(1);
-});
-})
+// Route Imports
+const product = require('./Routes/product');
+const user = require('./Routes/User');
+
+app.use("/api/v1", product);
+app.use("/api/v1", user);
+
+
+
+// Middleware for Errors
+app.use(ErrorMiddleware);
+
+module.exports = app;
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // import pakages
+// const express = require('express');
+// const ErrorMiddleware = require('./Middleware/ErrorMiddleware')
+// const dotenv = require("dotenv");
+// const cookieParser = require('cookie-parser');
+// const cors = require('cors');
+// const bodyparser = require('body-parser')
+// // Route Import
+// const product = require('./Routes/product');
+// const user = require('./Routes/User');
+
+// // import Databases
+
+// const app = express();
+// dotenv.config({path : "./config/config.env"});
+
+// // Call middleware
+// app.use(bodyparser.json());
+// app.use(cors());
+// app.use(cookieParser());
+// // const PORT = 5000;
+// // env config path
+
+// // Handling Uncought Exception
+// process.on("uncaughtException", (err) =>{
+// console.log(`Error : ${err.message}`);
+// console.log("Shutting Down the server due to Handling Uncought Exception");
+// process.exit(1);
+// })
+
+
+
+// app.use("/api/v1" , product);
+// app.use("/api/v1" , user);
+// // Middleware Error
+
+// app.use(ErrorMiddleware);
+ 
+
+// const server  = app.listen(process.env.PORT , ()=>{
+//     console.log(`Server is running in PORT # ${process.env.PORT})`);
+// })
+// // unhandled Promise Rejection check Error
+// process.on("unhandledRejection", err => {
+// console.log(`Error  : ${err.message}`);
+// console.log("Shutting Down the server due to unhandled Promise rejection");
+// server.close(() =>{
+//     process.exit(1);
+// });
+// })
