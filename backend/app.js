@@ -19,9 +19,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Route Imports
 const product = require('./Routes/product');
 const user = require('./Routes/User');
+const Orders = require('./Routes/Order');
 
 app.use("/api/v1", product);
 app.use("/api/v1", user);
+app.use("/api/v1", Orders);
 
 
 

@@ -84,4 +84,96 @@ exports.getAllproduct = CatchAsynErros(async (req, res, next) => {
   });
 });
 
+// Create Review || update Review
+exports.createUpdateReveiw = CatchAsynErros(async (req,res,next)=>{
+// destructuring.
+const {rating,Comment,producId} = req.body;
+// producId will add manually
+// create obj ..
+const Review = {
+  // all properties featch from data
+  user : req.user._id,
+  name : req.user.name,
+  rating : Number(rating), //rating should be number
+  Comment,
+};
+// user id find by this
+const Product = await product.findById(producId);
+
+const isReviewed = Product.Reviews.find(
+  (review)=> review.user.toString() === req.user._id.toString()  
+); 
+if(isReviewed){
+  Product.Reviews.forEach((review) => {
+    if(review.user.toString() === req.user._id.toString())
+    (review.rating = rating), (review.Comment = Comment)
+  });
+}else{
+  // Reviews => DB 
+  Product.Reviews.push(Review);
+  Product.numofReviews = Product.Reviews.length
+}
+// e.g => rating = 3,2,1,3 = 9/total rating => average
+let average = 0;
+Product.Reviews.forEach((review) =>{
+  average = average + review.rating;
+})
+Product.ratings = average / Product.Reviews.length; 
+await Product.save({validateBeforeSave : false});
+res.status(200).json({
+  success : true,
+});
+});
+
+
+// Get All User Reviews of a single product
+exports.getAllReviewsProduct = CatchAsynErros(async (req,res,next)=>{
+  // we will get product using findById
+  const Product = await product.findById(req.query.id);
+  if(!product){
+    return next(new ErrorHander("Product Not Found", 404));
+  }
+  res.status(200).json({
+    success: true,
+    Reviews : Product.Reviews,
+  })
+});
+
+// Not working we will do letter..
+
+// Delete All User Reviews of a single product
+exports.DeleteReview = CatchAsynErros(async (req,res,next)=>{
+  // we will get product using findById
+  const Product = await product.findById(req.query.productId);
+  if(!Product){
+    return next(new ErrorHander("Product Not Found", 404));
+  }
+//bellow condition reviews will be not deleted
+const reviews = Product.Reviews.filter(
+  (review)=> review._id.toString() !== req.query.id.toString()
+); 
+// const reviews = Product.Reviews.filter((review) => review._id.toString() !== req.query.id.toString());
+// Now reviews comes new then rating will also change
+let average = 0;
+// After deleted review
+reviews.forEach((review) =>{
+  average = average + review.rating;
+})
+const ratings = average / reviews.length; // get new rating
+const numofReviews = reviews.length;
+
+await product.findByIdAndUpdate(req.query.productId, {reviews,ratings,numofReviews},{
+  new : true,
+  runValidators : true,
+  useFindAndModify: false
+});
+res.status(200).json({
+    success: true,
+  })
+})
+
+
+
+
+
 

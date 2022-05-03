@@ -172,3 +172,66 @@ useFindAndModify: false
     upadateProfile,
   });
 });
+
+//Admin => get all Users List
+exports.adminGetAllUsers = CatchAsynErros(async (req,res,next)=>{
+  const users = await User.find();
+  res.status(200).json({
+    success : true,
+    users,
+  });
+});
+
+//Admin => get single User
+exports.adminGetSingleUser = CatchAsynErros(async (req,res,next)=>{
+  const user = await User.findById(req.params.id);
+  if(!user){
+return next(new ErrorHander(`User Doesn't Exist iD : ${req.params.id}`));
+  }
+
+  res.status(200).json({
+    success : true,
+    user,
+  });
+});
+
+//Admin = > Update User role .....
+exports.updateUserRole = CatchAsynErros(async (req,res,next)=>{
+
+  const upadateRole = {
+    email :req.body.email,
+    name : req.body.name, 
+    role : req.body.role,
+  }
+  //don't use req.user.id by this admin update itself
+  const user = await User.findByIdAndUpdate(req.params.id , upadateRole, {
+  new : true,
+  runValidators : true,
+  useFindAndModify: false
+  });
+  
+    res.status(200).json({
+      success : true,
+      upadateRole,
+    });
+  });
+
+//Admin = > Deleted User ...
+exports.DeleteUser = CatchAsynErros(async (req,res,next)=>{
+// we will remove cloudnary as well
+  const user = await User.findById(req.params.id);
+// if not user by ID then Error will be Occur
+  if(!user){
+  return next(new ErrorHander(`User does not Exist with id ${req.params.id}`));
+}
+// if User then remove user by ID through Admin
+await user.remove();
+res.status(200).json({
+  success : true,
+  message : `${user.name} User is deleted `,
+});
+});
+
+
+
+
