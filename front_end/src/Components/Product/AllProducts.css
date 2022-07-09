@@ -1,0 +1,78 @@
+.Productheading{
+    margin : 2vmax auto;
+    width : 15vw;
+    border-bottom : 1px solid rgba(0,0,0,0.171);
+    padding : 2vmax;
+    color : rgba(0,0,0,0.171);
+    text-align: center;   
+}
+.AllproductList{
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0  5vmax;
+    justify-content: center;
+}
+.pagination_block{
+    display: flex;
+    justify-content: center;
+    margin: 6vmax;
+}
+/* by default class this in pagination */
+.pagination{
+    display: flex;
+    justify-content: center;
+    padding: 0;
+}
+.page-item{
+    /* background-color: rgb(255, 255, 255); */
+    list-style: none;
+    border: 1px solid rgba(0,0,0,0.171);
+    padding: 0.7vmax 1.5vmax;
+    transition: all .3s;
+}
+.page-item:first-child{
+    border-radius: 5px 0 0 5px;
+}
+.page-item:last-child{
+    border-radius: 5px 0 0 5px;
+}
+.page-item:hover{
+    background-color: #555;
+}
+.page-link:hover{
+    background-color: #333;
+}
+.pageItemActive{
+    background-color: tomato;
+}
+
+
+/* =============== */
+.FilterBox{
+    width: 10vmax;
+    position: absolute;
+    top: 15vmax;
+    left: 4vmax;
+}
+.Categories{
+    padding: 0;
+    margin-top: 1vmax;
+}
+.Category-type{
+    color:black;
+    font : 400 1.2vmax "Roboto";
+    margin : 0.4vmax;
+    cursor: pointer;
+    transition: all .3s;
+}
+.Category-type:hover{
+    color: tomato;
+}
+
+
+
+
+
+
+
+

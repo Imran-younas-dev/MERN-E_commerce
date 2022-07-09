@@ -32,11 +32,11 @@ const userSchema = new mongoose.Schema({
     {
         public_id :{
             type : String,
-            required : true
+            // required : true
         },
         url :{
             type : String,
-            required : true
+            // required : true
         }
     },
     // role => admin or common user
@@ -67,19 +67,18 @@ userSchema.methods.getJwtToken = function(){
 }
 // compare Password
 userSchema.methods.comparePassword = async function(enteredpassword){
-    return await bcrypt.compare(enteredpassword, this.password);
+    return await bcrypt.compare(enteredpassword, this.passsword);
 }
 // Reset password through token
-// userSchema.methods.getResetPasswordToken() = async function(){
+userSchema.methods.getResetPasswordToken() = async function(){
     // Generate new Token 
-    // const newRestToken = crypto.randomBytes(20).toString("hex");
+    const newRestToken = crypto.randomBytes(20).toString("hex");
     //  hash and adding resetPass to schema
-    // this.getResetPasswordToken = crypto.createHash("sha256").update(newRestToken).digest('hex');
+    this.getResetPasswordToken = crypto.createHash("sha256").update(newRestToken).digest('hex');
 // pwd expire when generaten token = 10mnt
-    // this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
-
-    // return newRestToken;
-// }
+    this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;   
+    return newRestToken;
+}
 
 
 

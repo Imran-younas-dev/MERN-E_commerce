@@ -1,0 +1,11 @@
+.icons{
+     display: flex;
+     justify-content: center;
+     align-items: center;
+    position: relative;
+    left: 60%;
+}
+ul li .logo{
+    font-size: 1.2rem;
+    font-weight: bold;
+}

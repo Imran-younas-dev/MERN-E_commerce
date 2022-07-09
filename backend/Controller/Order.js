@@ -65,7 +65,9 @@ exports.getAllOrdersByAdmin = CatchAsynErros(async (req,res,next)=>{
 exports.updateOrderStatusByAdmin = CatchAsynErros(async (req,res,next)=>{
     // we find Orders have in user field id ,_id => orders , User as we used ref in Order DB=> who ordered 
     const order = await Order.findById(req.params.id);
-    // STEPS TO APPLY IN API
+    if(!order){
+        return next(new ErrorHander(`Order Not Found with this ID ${req.params.id}`));
+    }// STEPS TO APPLY IN API
     // 1. update  status : "Delivered"
     // 2. go getAllOrders => refresh , update => "orderStatus" : "Delivered"
     // 3. go products Id which is used as a ref and refresh it =>get stock in decrease as per order quantity order 

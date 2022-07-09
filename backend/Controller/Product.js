@@ -1,4 +1,4 @@
-const product = require("../models/Product");
+const Product = require("../models/Product");
 const ErrorHander = require('../Util/ErrorHander');
 // this is for any required in db then error generate
 const CatchAsynErros = require('../Middleware/CatchAsynErros');
@@ -11,42 +11,42 @@ exports.createProduct = CatchAsynErros(async (req, res, next) => {
 // req.user.id => user logedin we save user Id 
   req.body.user = req.user.id; //direct val assign => id
   // using create method
-  const Product = await product.create(req.body);
+  const product = await Product.create(req.body);
   res.status(200).json({
     success: true,
-    Product,
+    product,
   });
 });
 
 // updateProduct -- adminSiite
 exports.updateProduct = CatchAsynErros(async (req, res, next) => {
   // let is liye q k isi ko change krne valy hai
-  let Product = await product.findById(req.params.id);
+  let product = await Product.findById(req.params.id);
   // if product didn't get
-  if (!Product) {
+  if (!product) {
   return next(new ErrorHander("Product Not Fount", 404))
     
   }
-  Product = await product.findByIdAndUpdate(req.params.id, req.body, {
+  product = await Product.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
     useFindAndModify: false,
   });
   res.status(200).json({
       success : true,
-      Product
+      product
   })
 });
 
 // Delete Products --admin site
 exports.deleteProduct = CatchAsynErros(async (req,res , next) =>{
-    const Product = await product.findById(req.params.id);
+    const product = await Product.findById(req.params.id);
     // agr product ni mili
-    if(!Product){
+    if(!product){
   return next(new ErrorHander("Product Not Fount", 404))
         
     }
-    await Product.remove();
+    await product.remove();
     res.status(200).json({
         success : true,
         message : "Product delete Succussfully"
@@ -55,32 +55,37 @@ exports.deleteProduct = CatchAsynErros(async (req,res , next) =>{
 
 // Get Single Product
 exports.getSingleProduct = CatchAsynErros(async (req, res, next) =>{
-const Product =  await product.findById(req.params.id);
-if(!Product){
+const product =  await Product.findById(req.params.id);
+// console.log(product);
+if(!product){
   // Next => call back function
   return next(new ErrorHander("Product Not Fount", 404))
     
 }
   res.status(200).json({
       success : true,
-      Product
-  })
+      product,
+  });
 });
 
 
 // get All products
 exports.getAllproduct = CatchAsynErros(async (req, res, next) => {
-  const resultPerPage = 5;
+  // return next(new ErrorHander("Temp error ", 500))
+  
+  const resultPerPage = 7;
   // count for show in dashboard
-  const productCount = await product.countDocuments(); 
-  const apiFeature = new ApiFeatures(product.find(), req.query)
+  const productCount = await Product.countDocuments(); 
+  // console.log(productCount);
+  const apiFeature = new ApiFeatures(Product.find(), req.query)
     .search()
     .pagination(resultPerPage);
     let products = await apiFeature.query;
-  res.status(200).json({
+    res.status(200).json({
     success: true,
     products,
     productCount,
+    resultPerPage,
   });
 });
 
@@ -98,28 +103,28 @@ const Review = {
   Comment,
 };
 // user id find by this
-const Product = await product.findById(producId);
+const product = await Product.findById(producId);
 
-const isReviewed = Product.Reviews.find(
+const isReviewed = product.Reviews.find(
   (review)=> review.user.toString() === req.user._id.toString()  
 ); 
 if(isReviewed){
-  Product.Reviews.forEach((review) => {
+  product.Reviews.forEach((review) => {
     if(review.user.toString() === req.user._id.toString())
     (review.rating = rating), (review.Comment = Comment)
   });
 }else{
   // Reviews => DB 
-  Product.Reviews.push(Review);
-  Product.numofReviews = Product.Reviews.length
+  product.Reviews.push(Review);
+  product.numofReviews = product.Reviews.length
 }
 // e.g => rating = 3,2,1,3 = 9/total rating => average
 let average = 0;
-Product.Reviews.forEach((review) =>{
+product.Reviews.forEach((review) =>{
   average = average + review.rating;
-})
-Product.ratings = average / Product.Reviews.length; 
-await Product.save({validateBeforeSave : false});
+});
+product.ratings = average / product.Reviews.length; 
+await product.save({validateBeforeSave : false});
 res.status(200).json({
   success : true,
 });
@@ -129,13 +134,13 @@ res.status(200).json({
 // Get All User Reviews of a single product
 exports.getAllReviewsProduct = CatchAsynErros(async (req,res,next)=>{
   // we will get product using findById
-  const Product = await product.findById(req.query.id);
+  const product = await Product.findById(req.query.id);
   if(!product){
     return next(new ErrorHander("Product Not Found", 404));
   }
   res.status(200).json({
     success: true,
-    Reviews : Product.Reviews,
+    Reviews : product.Reviews,
   })
 });
 
@@ -144,8 +149,8 @@ exports.getAllReviewsProduct = CatchAsynErros(async (req,res,next)=>{
 // Delete All User Reviews of a single product
 exports.DeleteReview = CatchAsynErros(async (req,res,next)=>{
   // we will get product using findById
-  const Product = await product.findById(req.query.productId);
-  if(!Product){
+  const product = await Product.findById(req.query.productId);
+  if(!product){
     return next(new ErrorHander("Product Not Found", 404));
   }
 //bellow condition reviews will be not deleted
@@ -162,7 +167,7 @@ reviews.forEach((review) =>{
 const ratings = average / reviews.length; // get new rating
 const numofReviews = reviews.length;
 
-await product.findByIdAndUpdate(req.query.productId, {reviews,ratings,numofReviews},{
+await Product.findByIdAndUpdate(req.query.productId, {reviews,ratings,numofReviews},{
   new : true,
   runValidators : true,
   useFindAndModify: false

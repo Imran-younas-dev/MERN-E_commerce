@@ -5,7 +5,6 @@ class ErrorHander extends Error{
         this.statusCode = statusCode;
         // this target yeh khud obj
         Error.captureStackTrace(this, this.constructor);
-
     }
 }
 module.exports = ErrorHander;

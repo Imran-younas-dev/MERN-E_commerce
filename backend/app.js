@@ -3,9 +3,18 @@ const app = express();
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const path = require("path");
+const cors = require('cors');
+const fileupload = require('express-fileupload');
+
+const corsOptions ={
+  origin:'http://localhost:3000', 
+  credentials:true,            //access-control-allow-credentials:true
+  optionSuccessStatus:200
+}
+app.use(cors(corsOptions));
+
 
 const ErrorMiddleware = require('./Middleware/ErrorMiddleware')
-
 
 // Config
 if (process.env.NODE_ENV !== "PRODUCTION") {
@@ -15,7 +24,7 @@ if (process.env.NODE_ENV !== "PRODUCTION") {
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(fileupload());
 // Route Imports
 const product = require('./Routes/product');
 const user = require('./Routes/User');
